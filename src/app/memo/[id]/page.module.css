@@ -1,0 +1,182 @@
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    padding-bottom: 4rem;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.backButton {
+    color: var(--color-text);
+    padding: 0.5rem;
+    border-radius: 50%;
+    margin-right: 1rem;
+    transition: .2s;
+}
+
+.backButton:hover {
+    background: var(--color-border);
+}
+
+.date {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+}
+
+.card {
+    background: var(--color-surface);
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border);
+}
+
+.jpText {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--color-text);
+}
+
+.generateButton {
+    width: 100%;
+    padding: 1rem;
+    background: var(--color-primary);
+    color: white;
+    border-radius: var(--radius-md);
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: .2s;
+    box-shadow: var(--shadow-md);
+}
+
+.generateButton:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+    transform: translateY(-2px);
+}
+
+.generateButton:disabled {
+    opacity: 0.7;
+}
+
+.resultSection {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.bestResult {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 1.5rem;
+}
+
+.englishText {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1e40af;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.speakButton {
+    background: white;
+    color: #1e40af;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: .2s;
+}
+
+.speakButton:hover {
+    transform: scale(1.1);
+    background: #dbeafe;
+}
+
+.label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.subSection {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+}
+
+.list {
+    list-style-position: inside;
+    padding-left: 0.5rem;
+}
+
+.list li {
+    margin-bottom: 0.5rem;
+}
+
+.doneButton {
+    width: 100%;
+    padding: 1rem;
+    background: #10b981;
+    color: white;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+    transition: .2s;
+}
+
+.doneButton:hover {
+    background: #059669;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

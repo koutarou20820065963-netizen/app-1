@@ -1,0 +1,20 @@
+{
+  "name": "instant-memo-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "idb": "^8.0.3",
+    "lucide-react": "^0.562.0",
+    "next": "latest",
+    "next-pwa": "^5.6.0",
+    "openai": "^6.16.0",
+    "react": "latest",
+    "react-dom": "latest"
+  }
+}

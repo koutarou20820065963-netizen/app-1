@@ -1,0 +1,196 @@
+/* Existing Styles retained/merged */
+.container {
+    padding: 1.5rem 1rem 5rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    color: var(--color-foreground);
+}
+
+.loading {
+    text-align: center;
+    color: var(--color-text-secondary);
+    margin-top: 2rem;
+}
+
+.actionCard {
+    background: var(--color-surface);
+    border: 2px solid var(--color-foreground);
+    /* Emphasize action */
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.iconAccent {
+    color: #f59e0b;
+    margin-right: 8px;
+}
+
+.reviewList {
+    margin: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.reviewItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    background: var(--color-surface-hover);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+}
+
+.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 70%;
+}
+
+.badgeDue {
+    background: #fee2e2;
+    color: #dc2626;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.badgeCheck {
+    background: #fef3c7;
+    color: #d97706;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.reviewButton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--color-foreground);
+    color: var(--color-background);
+    border-radius: var(--radius-md);
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.goodEval {
+    text-align: center;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+}
+
+.statGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.statCard {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.cardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.bigNum {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--color-foreground);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.unit {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-left: 4px;
+    color: var(--color-text-secondary);
+}
+
+.subText {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+}
+
+.sectionHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--color-foreground);
+    margin-top: 2rem;
+}
+
+.ranking {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.rankItem {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+
+.rankNum {
+    width: 24px;
+    height: 24px;
+    background: var(--color-surface-hover);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-right: 1rem;
+}
+
+.rankLabel {
+    flex: 1;
+    font-weight: 600;
+}
+
+.rankCount {
+    font-weight: 700;
+    color: var(--color-text-secondary);
+}
+
+.empty {
+    text-align: center;
+    color: var(--color-text-secondary);
+    padding: 1rem;
+}
