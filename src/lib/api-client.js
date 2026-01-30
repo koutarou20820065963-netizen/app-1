@@ -23,6 +23,10 @@ export async function getMemos(status = 'unprocessed') {
     return fetchAPI(`/api/memos?status=${status}`);
 }
 
+export async function getMemo(id) {
+    return fetchAPI(`/api/memos/${id}`);
+}
+
 export async function updateMemo(id, updates) {
     return fetchAPI(`/api/memos/${id}`, {
         method: 'PATCH',
