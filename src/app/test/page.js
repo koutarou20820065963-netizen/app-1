@@ -1,190 +1,248 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { getMemos, updateMemo } from '../../lib/db';
-import VoiceInput from '../../components/VoiceInput';
+import { useState, useEffect, useRef } from 'react';
 import styles from './page.module.css';
-import { Play, CheckCircle, XCircle, ArrowRight, RefreshCw, Loader2 } from 'lucide-react';
+import { Mic, CheckCircle, XCircle, ArrowRight, RefreshCw, Play, StopCircle } from 'lucide-react';
 
 export default function TestPage() {
-    // Stage: 'start', 'quiz', 'result', 'loading'
-    const [stage, setStage] = useState('loading'); // loading -> start (if items) or empty
-    const [dueMemos, setDueMemos] = useState([]);
-    const [currentIdx, setCurrentIdx] = useState(0);
-    const [userAnswer, setUserAnswer] = useState('');
-    const [feedback, setFeedback] = useState(null); // { score, bestFix, reasonJa }
-    const [isGrading, setIsGrading] = useState(false);
+    const [questions, setQuestions] = useState([]);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [answers, setAnswers] = useState({});
+    const [results, setResults] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [grading, setGrading] = useState(false);
+    const [listening, setListening] = useState(false);
 
-    const loadDueMemos = async () => {
-        setStage('loading');
+    // Voice recognition ref
+    const recognition = useRef(null);
+    // Prevent double fetch in strict mode
+    const hasFetched = useRef(false);
+
+    useEffect(() => {
+        if (!hasFetched.current) {
+            hasFetched.current = true;
+            loadQuestions();
+        }
+
+        // Init SpeechRecognition
+        if (typeof window !== 'undefined') {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                recognition.current = new SpeechRecognition();
+                recognition.current.lang = 'en-US';
+                recognition.current.continuous = false;
+                recognition.current.interimResults = false;
+
+                recognition.current.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    if (questions.length > 0) {
+                        setAnswers(prev => ({
+                            ...prev,
+                            // Use functional index check or just ensure safe access
+                            [questions[currentIndex]?.id]: transcript
+                        }));
+                    }
+                    setListening(false);
+                };
+
+                recognition.current.onerror = (e) => {
+                    console.error(e);
+                    setListening(false);
+                };
+
+                recognition.current.onend = () => setListening(false);
+            }
+        }
+    }, [questions.length, currentIndex]); // Careful with deps. Questions length changes only once.
+
+    const loadQuestions = async () => {
+        setLoading(true);
         try {
-            const allDone = await getMemos('done');
-            const now = new Date();
-            // Filter logic: In real app, check nextReviewAt.
-            // For MVP: Just take random 3 from 'done'.
-            const shuffled = allDone.sort(() => 0.5 - Math.random());
-            const selected = shuffled.slice(0, 3);
-            setDueMemos(selected);
-            setStage(selected.length > 0 ? 'start' : 'empty');
+            // Fetch local unprocessed memos
+            // We need to dynamic import or use the imported getMemos
+            const { getMemos } = await import('../../lib/db');
+            const unprocessed = await getMemos('unprocessed');
+
+            if (unprocessed.length === 0) {
+                setQuestions([]);
+                return;
+            }
+
+            const res = await fetch('/api/test/generate', {
+                method: 'POST',
+                body: JSON.stringify({
+                    mode: 'custom',
+                    sources: unprocessed
+                })
+            });
+            const data = await res.json();
+            if (data.questions && data.questions.length > 0) {
+                setQuestions(data.questions);
+            }
         } catch (e) {
             console.error(e);
-            setStage('empty');
+        } finally {
+            setLoading(false);
         }
     };
 
-    useEffect(() => {
-        loadDueMemos();
-    }, []);
-
-    const startQuiz = () => {
-        setStage('quiz');
-        setCurrentIdx(0);
-        setUserAnswer('');
-        setFeedback(null);
+    const handleAnswerChange = (e) => {
+        setAnswers({ ...answers, [questions[currentIndex].id]: e.target.value });
     };
 
-    const handleGrade = async () => {
-        if (!userAnswer.trim()) return;
-        setIsGrading(true);
-        const currentMemo = dueMemos[currentIdx];
+    const startListening = () => {
+        if (recognition.current) {
+            setListening(true);
+            recognition.current.start();
+        } else {
+            alert("Voice input not supported in this browser.");
+        }
+    };
 
+    const stopListening = () => {
+        if (recognition.current) {
+            recognition.current.stop();
+            setListening(false);
+        }
+    };
+
+    const submitAnswer = async () => {
+        const q = questions[currentIndex];
+        const userAns = answers[q.id];
+
+        if (!userAns) return;
+
+        setGrading(true);
         try {
+            // Include memoId for auto-complete logic
             const res = await fetch('/api/grade', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    targetEn: currentMemo.aiCache.best,
-                    userEn: userAnswer,
-                    jpContext: currentMemo.jpText
+                    question: q.text,
+                    userAnswer: userAns,
+                    correctAnswer: q.answer,
+                    memoId: q.memoId,
+                    currentLevel: q.level || 0 // Pass current SRS level
                 }),
             });
             const result = await res.json();
-            setFeedback(result);
+            setResults({ ...results, [q.id]: result });
 
-            // Update Review Stats (MVP: just rudimentary)
-            // Ideally push to attempts array
-            await updateMemo(currentMemo.id, {
-                review: { lastReviewedAt: new Date().toISOString() } // simplified
-            });
+            // Client-side Update (SRS)
+            if (q.memoId && result.srs) {
+                const { updateMemo } = await import('../../lib/db');
+                const updates = {
+                    review: {
+                        level: result.srs.level,
+                        interval: result.srs.interval,
+                        nextReviewAt: result.srs.nextReviewAt
+                    }
+                };
+
+                // If graduated, mark done
+                if (result.srs.markAsDone) {
+                    updates.status = 'done';
+                }
+
+                await updateMemo(q.memoId, updates);
+            }
 
         } catch (e) {
             console.error(e);
-            setFeedback({ score: 0, bestFix: "Error", reasonJa: "採点に失敗しました" });
+            alert("Grading failed");
         } finally {
-            setIsGrading(false);
+            setGrading(false);
         }
     };
 
     const nextQuestion = () => {
-        if (currentIdx < dueMemos.length - 1) {
-            setCurrentIdx(currentIdx + 1);
-            setUserAnswer('');
-            setFeedback(null);
-        } else {
-            setStage('finished');
+        if (currentIndex < questions.length - 1) {
+            setCurrentIndex(currentIndex + 1);
         }
     };
 
-    const handleTranscript = (text) => {
-        // Append with space if existing content
-        setUserAnswer(prev => prev ? prev + ' ' + text : text);
-    };
+    const isPass = (score) => score >= 80;
 
-    if (stage === 'loading') return <div className={styles.container}><div className={styles.loading}>読み込み中...</div></div>;
+    if (loading) return <div className={styles.loadingContainer}><div className={styles.spinner}></div><p>Loading Test...</p></div>;
+    if (questions.length === 0) return <div className={styles.container}><p>No questions available. Translate some memos first!</p></div>;
 
-    if (stage === 'empty' || stage === 'finished') {
-        return (
-            <main className={styles.container}>
-                <h1 className={styles.title}>復習テスト</h1>
-                <div className={styles.centerCard}>
-                    {stage === 'empty' ? (
-                        <>
-                            <p>復習するメモがありません。</p>
-                            <p className={styles.sub}>メモを完了するとここに出題されます。</p>
-                        </>
-                    ) : (
-                        <>
-                            <CheckCircle size={48} className={styles.successIcon} />
-                            <h2>お疲れ様でした！</h2>
-                            <p>今日の復習は完了です。</p>
-                            <button className={styles.primaryButton} onClick={loadDueMemos}>
-                                <RefreshCw size={18} /> もう一度 (デモ用)
-                            </button>
-                        </>
-                    )}
-                </div>
-            </main>
-        );
-    }
-
-    if (stage === 'start') {
-        return (
-            <main className={styles.container}>
-                <h1 className={styles.title}>復習テスト</h1>
-                <div className={styles.introCard}>
-                    <p>復習待ちのメモ: <strong>{dueMemos.length}件</strong></p>
-                    <p className={styles.sub}>英語で入力(または発音)して、定着度を確認しましょう。</p>
-                    <button className={styles.startButton} onClick={startQuiz}>
-                        <Play size={20} fill="currentColor" /> テストを開始 (3問)
-                    </button>
-                </div>
-            </main>
-        );
-    }
-
-    // Quiz View
-    const currentMemo = dueMemos[currentIdx];
+    const currentQ = questions[currentIndex];
+    const currentResult = results[currentQ.id];
 
     return (
-        <main className={styles.container}>
-            <div className={styles.header}>
-                <span>Question {currentIdx + 1} / {dueMemos.length}</span>
-            </div>
+        <div className={styles.container}>
+            <header className={styles.header}>
+                <h1>Review Test</h1>
+                <span className={styles.progress}>Q {currentIndex + 1} / {questions.length}</span>
+            </header>
 
-            <div className={styles.questionCard}>
-                <div className={styles.jpText}>{currentMemo.jpText}</div>
+            <div className={styles.card}>
+                <div className={styles.questionType}>{currentQ.type}</div>
+                <h2 className={styles.questionText}>{currentQ.text}</h2>
+                {currentQ.hint && <p className={styles.hint}>Hint: {currentQ.hint}</p>}
 
-                {!feedback ? (
-                    <div className={styles.inputArea}>
-                        <div className={styles.inputTools}>
-                            <VoiceInput onTranscript={handleTranscript} disabled={isGrading} />
-                        </div>
-                        <textarea
-                            className={styles.textarea}
-                            placeholder="英語で入力..."
-                            value={userAnswer}
-                            onChange={(e) => setUserAnswer(e.target.value)}
-                            rows={3}
-                        />
+                <div className={styles.inputArea}>
+                    <textarea
+                        className={styles.textarea}
+                        value={answers[currentQ.id] || ''}
+                        onChange={handleAnswerChange}
+                        placeholder="Type answer or speak..."
+                        disabled={!!currentResult}
+                    />
+                    <button
+                        className={`${styles.micBtn} ${listening ? styles.listening : ''}`}
+                        onClick={listening ? stopListening : startListening}
+                        disabled={!!currentResult}
+                        title="Voice Input"
+                    >
+                        {listening ? <StopCircle size={24} /> : <Mic size={24} />}
+                    </button>
+                </div>
+
+                {!currentResult ? (
+                    <div className={styles.actionRow}>
                         <button
-                            className={styles.gradeButton}
-                            onClick={handleGrade}
-                            disabled={isGrading || !userAnswer.trim()}
+                            className={styles.submitBtn}
+                            onClick={submitAnswer}
+                            disabled={!answers[currentQ.id] || grading}
                         >
-                            {isGrading ? <Loader2 className={styles.spin} /> : '採点する'}
+                            {grading ? 'Converting...' : 'Submit'}
                         </button>
                     </div>
                 ) : (
-                    <div className={styles.feedbackArea}>
-                        <div className={`${styles.scoreBadge} ${feedback.score >= 80 ? styles.good : styles.bad}`}>
-                            {feedback.score >= 80 ? <CheckCircle size={20} /> : <XCircle size={20} />}
-                            <span>Score: {feedback.score}</span>
+                    <div className={styles.resultArea}>
+                        <div className={`${styles.scoreBadge} ${isPass(currentResult.score) ? styles.pass : styles.fail}`}>
+                            {isPass(currentResult.score) ? <CheckCircle size={24} /> : <XCircle size={24} />}
+                            <span className={styles.scoreNum}>{currentResult.score}</span>
                         </div>
+                        <p className={styles.comment}>{currentResult.reasonJa}</p>
 
-                        <div className={styles.feedbackContent}>
-                            <p className={styles.reason}>{feedback.reasonJa}</p>
-                            <div className={styles.fixBox}>
-                                <div className={styles.fixLabel}>改善案 / 正解</div>
-                                <div className={styles.fixText}>{feedback.bestFix}</div>
+                        {isPass(currentResult.score) && (
+                            <div className={styles.autoDoneMsg}>
+                                <CheckCircle size={14} /> Completed! Moved to Archive.
                             </div>
-                        </div>
+                        )}
 
-                        <button className={styles.nextButton} onClick={nextQuestion}>
-                            次へ <ArrowRight size={18} />
-                        </button>
+                        {currentResult.bestFix && (
+                            <div className={styles.fixBox}>
+                                <strong>Model Answer:</strong> {currentResult.bestFix}
+                            </div>
+                        )}
+                        <div className={styles.navBtns}>
+                            {currentIndex < questions.length - 1 ? (
+                                <button className={styles.nextBtn} onClick={nextQuestion}>
+                                    Next Question <ArrowRight size={16} />
+                                </button>
+                            ) : (
+                                <button className={styles.finishBtn} onClick={() => alert("Test Completed!")}>
+                                    Finish Test
+                                </button>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>
-        </main>
+        </div>
     );
 }

@@ -1,96 +1,66 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getAllMemos, updateMemo } from '../../lib/db';
+import { getMemos } from '@/lib/db';
 import styles from './page.module.css';
-import { Calendar, AlertTriangle, ArrowRight, CheckCircle } from 'lucide-react';
-import Link from 'next/link';
-
-// ... existing imports ...
+import { PieChart, List, Sparkles, Clock } from 'lucide-react';
 
 export default function InsightsPage() {
     const [stats, setStats] = useState(null);
-    const [todaysReview, setTodaysReview] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const selectReviewItems = (memos) => {
-        const doneMemos = memos.filter(m => m.status === 'done');
-        const now = new Date();
+    useEffect(() => {
+        calculateInsights();
+    }, []);
 
-        // 1. Due Items
-        const due = doneMemos.filter(m => m.review?.nextReviewAt && new Date(m.review.nextReviewAt) <= now);
-
-        // 2. Weak Items (Last score < 80)
-        const weak = doneMemos.filter(m => {
-            if (due.includes(m)) return false;
-            const lastAttempt = m.review?.attempts?.[m.review.attempts.length - 1];
-            return lastAttempt && lastAttempt.score < 80;
-        });
-
-        // 3. Low Confidence Tags (< 70)
-        const uncertain = doneMemos.filter(m => {
-            if (due.includes(m) || weak.includes(m)) return false;
-            return m.tags?.confidence && m.tags.confidence < 70;
-        });
-
-        // 4. Random Fill
-        const others = doneMemos.filter(m => !due.includes(m) && !weak.includes(m) && !uncertain.includes(m));
-        const randomFill = others.sort(() => 0.5 - Math.random());
-
-        // Combine unique items
-        return [...due, ...weak, ...uncertain, ...randomFill].slice(0, 3);
+    const cleanText = (text) => {
+        if (!text) return '';
+        return text.replace(/\*\*/g, '').trim();
     };
 
-    const calculateStats = (memos) => {
-        // ... (existing logic) ...
-        const topics = {};
-        const patterns = {};
-        let taggedCount = 0;
-        let totalScore = 0;
-        let scoreCount = 0;
-
-        memos.forEach(m => {
-            if (m.tags) {
-                taggedCount++;
-                if (m.tags.topic) topics[m.tags.topic] = (topics[m.tags.topic] || 0) + 1;
-                if (m.tags.pattern) patterns[m.tags.pattern] = (patterns[m.tags.pattern] || 0) + 1;
-            }
-            // Calc average score
-            if (m.review?.attempts?.length > 0) {
-                const lastScore = m.review.attempts[m.review.attempts.length - 1].score;
-                totalScore += lastScore;
-                scoreCount++;
-            }
-        });
-
-        const sortObj = (obj) => Object.entries(obj)
-            .sort(([, a], [, b]) => b - a)
-            .slice(0, 5);
-
-        return {
-            total: memos.length,
-            taggedCount,
-            topTopics: sortObj(topics),
-            topPatterns: sortObj(patterns),
-            untagged: memos.filter(m => !m.tags && m.aiCache),
-            avgScore: scoreCount > 0 ? Math.round(totalScore / scoreCount) : 0,
-            completionRate: memos.length > 0 ? Math.round((memos.filter(m => m.status === 'done').length / memos.length) * 100) : 0
-        };
-    };
-
-    const loadStats = async () => {
-        setLoading(true);
+    const calculateInsights = async () => {
         try {
-            const memos = await getAllMemos();
-            const s = calculateStats(memos);
-            setStats(s);
-            setTodaysReview(selectReviewItems(memos));
+            // Fetch 'done' memos for history
+            const memos = await getMemos('done');
 
-            // Auto-tagging ... (existing) ...
-            const candidate = s.untagged[0];
-            if (candidate) {
-                autoTag(candidate);
-            }
+            // 1. Analyze Patterns (Simple Start-of-sentence N-gram)
+            const patterns = {};
+            const vocab = {};
+
+            memos.forEach(m => {
+                if (m.aiCache && m.aiCache.english) {
+                    const en = cleanText(m.aiCache.english);
+                    // Get first 2-3 words for sentence patterns
+                    const words = en.split(' ');
+                    if (words.length >= 2) {
+                        const pattern2 = words.slice(0, 2).join(' ').toLowerCase();
+                        patterns[pattern2] = (patterns[pattern2] || 0) + 1;
+                    }
+                    if (words.length >= 3) {
+                        const pattern3 = words.slice(0, 3).join(' ').toLowerCase();
+                        patterns[pattern3] = (patterns[pattern3] || 0) + 1;
+                    }
+                }
+            });
+
+            // Filter significant patterns (appear more than once or just top ones)
+            // For MVP, just show top sorted
+            const sortedPatterns = Object.entries(patterns)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 6)
+                .map(([pt, count]) => ({
+                    text: pt,
+                    count: count,
+                    // Find an example
+                    example: memos.find(m => m.aiCache?.english?.toLowerCase().startsWith(pt))?.aiCache?.english
+                }));
+
+            setStats({
+                total: memos.length,
+                patterns: sortedPatterns,
+                history: memos.slice(0, 20) // Top 20 recent
+            });
+
         } catch (e) {
             console.error(e);
         } finally {
@@ -98,110 +68,67 @@ export default function InsightsPage() {
         }
     };
 
-    // ... autoTag ...
-    const autoTag = async (memo) => {
-        try {
-            const res = await fetch('/api/tag', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ jpText: memo.jpText, enText: memo.aiCache.best }),
-            });
-            if (res.ok) {
-                const tags = await res.json();
-                await updateMemo(memo.id, { tags });
-            }
-        } catch (e) {
-            console.error("Auto-tag failed", e);
-        }
-    };
-
-
-    useEffect(() => {
-        loadStats();
-    }, []);
-
-    if (loading) return <div className={styles.container}><div className={styles.loading}>読み込み中...</div></div>;
+    if (loading) return <div className={styles.loading}>Loading Data...</div>;
 
     return (
-        <main className={styles.container}>
-            <h1 className={styles.title}>学習分析</h1>
+        <div className={styles.container}>
+            <header className={styles.header}>
+                <h1 className={styles.title}>Learning Insights</h1>
+                <p className={styles.sub}>Total Completed: <strong>{stats?.total || 0}</strong></p>
+            </header>
 
-            {/* Today's Review Action */}
-            <div className={styles.actionCard}>
-                <div className={styles.cardHeader}>
-                    <Calendar size={20} className={styles.iconAccent} />
-                    <span>今日の復習</span>
+            {/* Pattern Analysis */}
+            <section className={styles.section}>
+                <div className={styles.secTitle}>
+                    <Sparkles size={20} className={styles.iconAccent} />
+                    <h2>Frequent Patterns</h2>
                 </div>
-                {todaysReview.length > 0 ? (
-                    <div className={styles.reviewContent}>
-                        <div className={styles.reviewList}>
-                            {todaysReview.map(m => (
-                                <div key={m.id} className={styles.reviewItem}>
-                                    <span className={styles.truncate}>{m.jpText}</span>
-                                    {m.review?.nextReviewAt && new Date(m.review.nextReviewAt) <= new Date() &&
-                                        <span className={styles.badgeDue}>期限</span>}
-                                    {m.tags?.confidence < 70 &&
-                                        <span className={styles.badgeCheck}>要確認</span>}
+
+                {stats?.patterns?.length > 0 ? (
+                    <div className={styles.patternGrid}>
+                        {stats.patterns.map((p, i) => (
+                            <div key={i} className={styles.patternCard}>
+                                <div className={styles.pHeader}>
+                                    <span className={styles.pText}>{p.text}...</span>
+                                    <span className={styles.pCount}>{p.count}x</span>
                                 </div>
-                            ))}
-                        </div>
-                        <Link href="/test" className={styles.reviewButton}>
-                            テストを開始 <ArrowRight size={16} />
-                        </Link>
+                                <p className={styles.pExample}>"{cleanText(p.example)}"</p>
+                            </div>
+                        ))}
                     </div>
                 ) : (
-                    <p className={styles.goodEval}>現在は復習推奨アイテムがありません！<br />どんどんメモを追加しましょう。</p>
+                    <div className={styles.empty}>
+                        <p>No patterns detected yet.<br />Complete more memos!</p>
+                    </div>
                 )}
-            </div>
+            </section>
 
-            <div className={styles.statGrid}>
-                <div className={styles.statCard}>
-                    <div className={styles.cardHeader}>
-                        <PieChart size={20} />
-                        <span>完了率</span>
-                    </div>
-                    <div className={styles.bigNum}>{stats.completionRate}<span className={styles.unit}>%</span></div>
-                    <div className={styles.subText}>{stats.total}件中</div>
+            {/* Recent History */}
+            <section className={styles.section}>
+                <div className={styles.secTitle}>
+                    <List size={20} className={styles.iconAccent} />
+                    <h2>Recent History</h2>
                 </div>
-                <div className={styles.statCard}>
-                    <div className={styles.cardHeader}>
-                        <CheckCircle size={20} />
-                        <span>平均スコア</span>
-                    </div>
-                    <div className={styles.bigNum}>{stats.avgScore}<span className={styles.unit}>点</span></div>
+
+                <div className={styles.historyList}>
+                    {stats?.history?.map(m => (
+                        <div key={m.id} className={styles.historyCard}>
+                            <div className={styles.hContent}>
+                                <p className={styles.hJp}>{m.jpText}</p>
+                                <p className={styles.hEn}>{cleanText(m.aiCache?.english || m.aiCache?.best)}</p>
+                            </div>
+                            <div className={styles.hMeta}>
+                                <Clock size={12} />
+                                <span>{new Date(m.createdAt).toLocaleDateString()}</span>
+                                <span className={styles.statusDone}>Done</span>
+                            </div>
+                        </div>
+                    ))}
+                    {(!stats?.history || stats.history.length === 0) && (
+                        <p className={styles.empty}>No history yet.</p>
+                    )}
                 </div>
-            </div>
-
-            {/* ... Existing Rankings ... */}
-            <div className={styles.sectionHeader}>
-                <List size={18} /> よく使うトピック
-            </div>
-            <div className={styles.ranking}>
-                {stats.topTopics.length === 0 ? <p className={styles.empty}>データ収集中...</p> :
-                    stats.topTopics.map(([topic, count], i) => (
-                        <div key={topic} className={styles.rankItem}>
-                            <span className={styles.rankNum}>{i + 1}</span>
-                            <span className={styles.rankLabel}>{topic}</span>
-                            <span className={styles.rankCount}>{count}</span>
-                        </div>
-                    ))
-                }
-            </div>
-
-            <div className={styles.sectionHeader}>
-                <Tag size={18} /> 苦手・頻出の型
-            </div>
-            <div className={styles.ranking}>
-                {stats.topPatterns.length === 0 ? <p className={styles.empty}>データ収集中...</p> :
-                    stats.topPatterns.map(([pattern, count], i) => (
-                        <div key={pattern} className={styles.rankItem}>
-                            <span className={styles.rankNum}>{i + 1}</span>
-                            <span className={styles.rankLabel}>{pattern}</span>
-                            <span className={styles.rankCount}>{count}</span>
-                        </div>
-                    ))
-                }
-            </div>
-        </main>
+            </section>
+        </div>
     );
 }

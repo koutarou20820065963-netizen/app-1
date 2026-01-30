@@ -2,64 +2,38 @@
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    padding: 1.25rem;
-    position: relative;
-    box-shadow: var(--shadow-sm);
-    animation: fadeIn 0.3s ease;
+    overflow: hidden;
+    margin-bottom: 20px;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.originalSection {
+    background: var(--color-surface-hover);
+    padding: 16px;
+    border-bottom: 1px solid var(--color-border);
 }
 
-/* Toast */
-.toast {
-    position: absolute;
-    top: -40px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.2s;
-    white-space: nowrap;
-    z-index: 10;
+.jpText {
+    font-size: 1rem;
+    color: var(--color-text-secondary);
 }
 
-.showToast {
-    opacity: 1;
-}
-
-/* Best Section */
-.bestSection {
-    margin-bottom: 1rem;
+.englishSection {
+    padding: 20px;
 }
 
 .labelRow {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.25rem;
+    margin-bottom: 12px;
 }
 
 .label {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--color-text-secondary);
+    font-size: 0.8rem;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.5px;
+    color: var(--color-text-secondary);
+    font-weight: bold;
 }
 
 .actions {
@@ -68,128 +42,163 @@
 }
 
 .iconBtn {
-    padding: 6px;
-    border-radius: 50%;
     background: transparent;
-    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
+    cursor: pointer;
+    color: var(--color-foreground);
+    transition: background 0.2s;
 }
 
 .iconBtn:hover {
     background: var(--color-surface-hover);
-    color: var(--color-foreground);
 }
 
-.bestText {
-    font-size: 1.5rem;
-    font-weight: 800;
-    line-height: 1.3;
-    color: var(--color-foreground);
-    letter-spacing: -0.01em;
+.englishText {
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1.4;
 }
 
-/* Original Section */
-.originalSection {
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
+/* Analysis */
+.analysisContainer {
+    border-top: 1px solid var(--color-border);
+}
+
+.section {
     border-bottom: 1px solid var(--color-border);
 }
 
-.jpText {
-    font-size: 0.9rem;
-    color: var(--color-text-secondary);
-    line-height: 1.5;
-}
-
-/* Accordion */
-.accordionContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.accordionItem {
-    border-bottom: 1px solid var(--color-surface-hover);
-}
-
-.accordionItem:last-child {
+.section:last-child {
     border-bottom: none;
 }
 
-.accordionHeader {
-    width: 100%;
+.sectionHeader {
+    padding: 12px 16px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 0.75rem 0;
-    background: none;
-    border: none;
+    gap: 10px;
     cursor: pointer;
-    color: var(--color-foreground);
+    background: var(--color-surface);
+    transition: background 0.2s;
 }
 
-.accordionTitle {
-    font-size: 0.9rem;
+.sectionHeader:hover {
+    background: var(--color-surface-hover);
+}
+
+.sectionHeader h4 {
+    flex: 1;
+    font-size: 0.95rem;
     font-weight: 600;
 }
 
-.accordionContent {
-    padding-bottom: 1rem;
+.pointList,
+.cautionList {
+    padding: 0 16px 16px 42px;
+    /* Indent for bullet/icon */
+    list-style: disc;
     font-size: 0.95rem;
     line-height: 1.6;
-    color: var(--color-foreground);
 }
 
-.altsList {
-    padding-left: 1.25rem;
-    padding-bottom: 1rem;
-    font-size: 0.95rem;
-    list-style-type: disc;
+/* Phrases (Bilingual) */
+.phraseList {
+    padding: 0 16px 16px 16px;
+    list-style: none;
 }
 
-.enExample {
-    margin-bottom: 0.25rem;
+.phraseItem {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed var(--color-border);
+}
+
+.phraseItem:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.phraseEn {
+    font-size: 1.05rem;
     font-weight: 500;
-}
-
-.jaExample {
-    font-size: 0.85rem;
-    color: var(--color-text-secondary);
-}
-
-/* Done Button */
-.doneButton {
-    margin-top: 1.5rem;
-    width: 100%;
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 8px;
-    padding: 1rem;
-    background: var(--color-foreground);
-    color: var(--color-background);
-    border-radius: var(--radius-md);
-    font-weight: 700;
+}
+
+.phraseJa {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    margin-left: 2px;
+    margin-top: 2px;
+}
+
+.miniVol {
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    opacity: 0.5;
     transition: opacity 0.2s;
 }
 
-.doneButton:hover {
-    opacity: 0.9;
+.miniVol:hover {
+    opacity: 1;
 }
 
-/* Loading State for header */
-.header {
+/* Caution */
+.cautionBox {
+    padding: 16px;
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.cautionTitle {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 6px;
+    color: var(--color-error);
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
 }
 
-.status {
-    display: flex;
-    gap: 4px;
-    font-size: 0.8rem;
+.cautionList {
+    padding-left: 20px;
     color: var(--color-text-secondary);
+}
+
+/* Icons */
+.iconPoint {
+    color: var(--color-accent);
+}
+
+.iconPhrase {
+    color: var(--color-text-secondary);
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--color-foreground);
+    color: var(--color-background);
+    padding: 8px 16px;
+    border-radius: 20px;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+}
+
+.showToast {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
 }

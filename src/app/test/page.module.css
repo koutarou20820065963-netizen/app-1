@@ -1,5 +1,237 @@
-.inputTools {
+/* Layout */
+.container {
+    padding: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+}
+
+.progress {
+    font-weight: bold;
+    color: var(--color-primary);
+}
+
+.card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.questionType {
+    background: var(--color-surface-hover);
+    padding: 8px;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.questionText {
+    padding: 30px 20px;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: bold;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.hint {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    text-align: center;
+    background: var(--color-background);
+}
+
+.inputArea {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 16px;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    resize: none;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    outline: none;
+}
+
+.textarea:focus {
+    border-color: var(--color-foreground);
+}
+
+.micBtn {
+    align-self: flex-end;
+    padding: 10px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.listening {
+    background: var(--color-error);
+    color: white;
+    border-color: var(--color-error);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.actionRow {
+    padding: 0 20px 20px 20px;
+}
+
+.submitBtn {
+    width: 100%;
+    padding: 16px;
+    background: var(--color-foreground);
+    /* Black button as requested */
+    color: var(--color-background);
+    border: 2px solid var(--color-foreground);
+    /* Defined border */
+    border-radius: var(--radius-md);
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    text-align: center;
+    transition: opacity 0.2s;
+}
+
+.submitBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Result Area */
+.resultArea {
+    padding: 20px;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-surface-hover);
+}
+
+.scoreBadge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 16px;
+}
+
+.pass {
+    color: var(--color-success);
+}
+
+.fail {
+    color: var(--color-error);
+}
+
+.comment {
+    margin-bottom: 20px;
+}
+
+.autoDoneMsg {
+    margin-bottom: 16px;
+    padding: 10px;
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--color-success);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.fixBox {
+    background: var(--color-surface);
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    margin-bottom: 20px;
+}
+
+.navBtns {
     display: flex;
     justify-content: flex-end;
-    margin-bottom: 0.5rem;
+}
+
+.nextBtn,
+.finishBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.loadingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 50vh;
+    gap: 16px;
+}
+
+.spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid var(--color-border);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }

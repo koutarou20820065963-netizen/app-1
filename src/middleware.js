@@ -1,46 +1,68 @@
-import { NextResponse } from 'next/server';
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
-const output = new Map();
+// Public routes
+const isPublicRoute = createRouteMatcher([
+    '/',
+    '/test(.*)',
+    '/queue(.*)',
+    '/insights(.*)',
+    '/archive(.*)',
+    '/memo(.*)',
+    '/api/translate(.*)',
+    '/api/test(.*)',
+    '/api/grade(.*)',
+    '/sign-in(.*)',
+    '/sign-up(.*)'
+]);
 
-// Simple cleanup every hour
-setInterval(() => output.clear(), 3600000);
+const rateLimits = new Map();
+const WINDOW_MS = 60 * 1000;
+const MAX_REQUESTS = 50;
 
-export function middleware(request) {
-    // Only limit API routes
-    if (!request.nextUrl.pathname.startsWith('/api')) {
-        return NextResponse.next();
-    }
+setInterval(() => rateLimits.clear(), 3600000);
 
-    const ip = request.headers.get('x-forwarded-for') || 'ip';
-    // const ip = 'global'; // For simple demo if header missing
-
-    // Limit: 50 requests per minute per IP
-    // Note: In serverless, this Map is per-instance, so it's loose security.
-    // Real security relies on OpenAI Hard Cap.
-
+function checkRateLimit(req) {
+    const ip = req.headers.get("x-forwarded-for") || "unknown";
     const now = Date.now();
-    const windowMs = 60 * 1000;
-    const limit = 50;
+    const record = rateLimits.get(ip) || { count: 0, startTime: now };
 
-    const record = output.get(ip) || { count: 0, startTime: now };
-
-    // Reset if window passed
-    if (now - record.startTime > windowMs) {
+    if (now - record.startTime > WINDOW_MS) {
         record.count = 1;
         record.startTime = now;
     } else {
         record.count++;
     }
 
-    output.set(ip, record);
-
-    if (record.count > limit) {
-        return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
-    }
-
-    return NextResponse.next();
+    rateLimits.set(ip, record);
+    return record.count <= MAX_REQUESTS;
 }
 
+export default clerkMiddleware((auth, req) => {
+    // 1. Rate Limiting for API
+    if (req.nextUrl.pathname.startsWith('/api')) {
+        if (!checkRateLimit(req)) {
+            return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+        }
+    }
+
+    // 2. Auth Protection
+    if (!isPublicRoute(req)) {
+        const { userId } = auth();
+        if (!userId) {
+            // Protect API routes with JSON 401
+            if (req.nextUrl.pathname.startsWith('/api')) {
+                return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+            }
+            // Protect Pages with Redirect
+            return auth().redirectToSignIn({ returnBackUrl: req.url });
+        }
+    }
+});
+
 export const config = {
-    matcher: '/api/:path*',
+    matcher: [
+        '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+        '/(api|trpc)(.*)',
+    ],
 };

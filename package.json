@@ -4,17 +4,27 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
+    "clean-dev": "rm -rf .next && next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@clerk/nextjs": "latest",
+    "@prisma/client": "^7.3.0",
     "idb": "^8.0.3",
     "lucide-react": "^0.562.0",
     "next": "latest",
     "next-pwa": "^5.6.0",
     "openai": "^6.16.0",
+    "pg": "^8.11.3",
+    "prisma": "^7.3.0",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "stripe": "^14.14.0"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^11.0.0"
   }
 }

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, BarChart2, BookOpen } from 'lucide-react';
+import { Home, BarChart2, BookOpen, List } from 'lucide-react';
 import styles from './Navigation.module.css';
 
 export default function Navigation() {
@@ -19,9 +19,13 @@ export default function Navigation() {
 
     return (
         <nav className={styles.nav}>
-            <Link href="/" className={`${styles.item} ${isHome && !pathname.includes('/insights') && !pathname.includes('/test') ? styles.active : ''}`}>
+            <Link href="/" className={`${styles.item} ${pathname === '/' ? styles.active : ''}`}>
                 <Home size={24} />
                 <span className={styles.label}>ホーム</span>
+            </Link>
+            <Link href="/queue" className={`${styles.item} ${isActive('/queue') ? styles.active : ''}`}>
+                <List size={24} />
+                <span className={styles.label}>未処理</span>
             </Link>
             <Link href="/test" className={`${styles.item} ${isActive('/test') ? styles.active : ''}`}>
                 <BookOpen size={24} />

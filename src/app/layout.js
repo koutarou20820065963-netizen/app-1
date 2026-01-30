@@ -7,13 +7,17 @@ export const metadata = {
   description: 'Instant Memo & Review App',
 };
 
+import { ClerkProvider } from '@clerk/nextjs';
+
 export default function RootLayout({ children }) {
   return (
-    <html lang="ja">
-      <body>
-        {children}
-        <Navigation />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="ja" suppressHydrationWarning>
+        <body>
+          {children}
+          <Navigation />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

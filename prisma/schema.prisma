@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String   @id // Clerk ID
+  email     String   @unique
+  role      String   @default("user") // "admin", "user"
+  credits   Int      @default(30)
+  createdAt DateTime @default(now())
+  
+  memos     Memo[]
+  logs      CreditLog[]
+}
+
+model Memo {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  
+  jpText       String
+  enText       String?  // Translated/Best Answer
+  status       String   @default("unprocessed") // "unprocessed", "done"
+  
+  // SRS Data
+  nextReviewAt DateTime @default(now())
+  level        Int      @default(0)
+  interval     Int      @default(0)
+  
+  tags         String?  // JSON string or comma separated
+  isPinned     Boolean  @default(false)
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model CreditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  action    String   // "translate", "grade_ai", "admin_add"
+  amount    Int      // Negative for usage, Positive for add
+  
+  createdAt DateTime @default(now())
+}

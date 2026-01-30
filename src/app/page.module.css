@@ -1,61 +1,188 @@
-.container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 1rem;
-    padding-top: 1rem;
-    padding-bottom: 2rem;
-    min-height: 100vh;
+.main {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    background: var(--color-background);
+}
+
+.header {
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.logo {
+    font-weight: 800;
+    font-size: 1.2rem;
+    letter-spacing: -0.5px;
+}
+
+.testLink {
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--color-primary);
+    padding: 8px 16px;
+    background: rgba(37, 99, 235, 0.1);
+    border-radius: var(--radius-full);
+}
+
+.scrollArea {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    padding-bottom: 120px;
+    /* Space for input */
+}
+
+/* Nav Grid */
+.navGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.navCard {
+    display: flex;
+    align-items: center;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    padding: 16px 20px;
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    color: var(--color-foreground);
+    transition: transform 0.1s, background 0.2s;
+}
+
+.navCard:active {
+    transform: scale(0.98);
+    background: var(--color-surface-hover);
+}
+
+.navIconBox {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--color-background);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 16px;
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+}
+
+.navInfo {
+    flex: 1;
     display: flex;
     flex-direction: column;
 }
 
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
+.navLabel {
+    font-weight: bold;
+    font-size: 1rem;
 }
 
-.title {
-    font-size: 1.25rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    color: var(--color-foreground);
+.navCount {
+    font-size: 0.85rem;
+    color: var(--color-primary);
+    font-weight: 600;
+    margin-top: 2px;
 }
 
-.counterLink {
-    font-size: 0.9rem;
-    text-decoration: none;
-    color: var(--color-foreground);
-    font-weight: 500;
-    padding: 4px 10px;
-    background: var(--color-surface-hover);
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
+.navArrow {
+    color: var(--color-text-tertiary);
 }
 
-.count {
-    font-weight: 700;
-    margin-left: 4px;
-}
-
-.inputSection {
-    margin-bottom: 2rem;
-}
-
-.hint {
-    text-align: center;
-    color: var(--color-text-secondary);
-    font-size: 0.9rem;
-    margin-top: 2rem;
-    line-height: 1.8;
-}
-
-/* Result Card */
-.resultCard {
-    margin-top: 1rem;
+/* Result Area */
+.resultContainer {
     animation: fadeIn 0.3s ease;
+}
+
+.resultHeader {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 8px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.resultActions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.actionBtnDone {
+    flex: 1;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: var(--radius-full);
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.actionBtnSecondary {
+    flex: 1;
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+    padding: 12px;
+    border-radius: var(--radius-full);
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Other */
+.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100px;
+    text-align: center;
+    color: var(--color-text-tertiary);
+    font-size: 0.9rem;
+    opacity: 0.6;
+}
+
+.error {
+    color: var(--color-error);
+    margin-top: 10px;
+    font-size: 0.9rem;
+}
+
+.inputWrapper {
+    position: fixed;
+    bottom: calc(60px + env(safe-area-inset-bottom));
+    /* Above Navigation */
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    max-width: 600px;
+    /* Limit width on desktop */
+    background: transparent;
+    /* Let the Pill component handle bg, or add backdrop if needed. */
+    /* Actually, user requested "Bar". Let's give it a background to cover scroll content. */
+    background: linear-gradient(to top, var(--color-background) 80%, rgba(255, 255, 255, 0));
+    padding: 12px 16px;
+    z-index: 101;
+    pointer-events: none;
+    /* Let clicks pass through transparent areas if any */
+}
+
+/* Enable pointer events on the input itself */
+.inputWrapper>* {
+    pointer-events: auto;
 }
 
 @keyframes fadeIn {
@@ -68,101 +195,4 @@
         opacity: 1;
         transform: translateY(0);
     }
-}
-
-.resultHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-    color: var(--color-text-secondary);
-    font-size: 0.9rem;
-}
-
-.jpPreview {
-    font-weight: 500;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 70%;
-}
-
-.generating {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    color: var(--color-foreground);
-    font-weight: 600;
-    font-size: 0.8rem;
-}
-
-.resultBody {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.bestContainer {
-    position: relative;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--color-border);
-}
-
-.bestLabel {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--color-text-secondary);
-    margin-bottom: 0.5rem;
-    font-weight: 700;
-}
-
-.bestText {
-    font-size: 1.75rem;
-    font-weight: 900;
-    line-height: 1.3;
-    letter-spacing: -0.02em;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-}
-
-.iconBtn {
-    padding: 8px;
-    border-radius: 50%;
-    background: var(--color-surface-hover);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    color: var(--color-foreground);
-}
-
-.altsContainer {
-    margin-top: 1rem;
-}
-
-.altsToggle {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--color-text-secondary);
-    padding: 8px 0;
-    width: 100%;
-}
-
-.altsList {
-    list-style: none;
-    margin-top: 0.5rem;
-    padding-left: 1rem;
-    border-left: 2px solid var(--color-border);
-}
-
-.altsList li {
-    padding: 6px 0;
-    font-size: 1rem;
-    color: var(--color-foreground);
 }

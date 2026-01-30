@@ -1,138 +1,127 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { getMemos, updateMemo } from '../lib/db';
-import MemoInput from '../components/MemoInput';
+import { Settings, Mic, StopCircle, ArrowRight, List, Archive, CheckCircle, Check } from 'lucide-react';
+import MemoInput from '@/components/MemoInput';
+import MemoResult from '@/components/MemoResult';
+import { addMemo, getMemos, updateMemo } from '@/lib/db';
 import styles from './page.module.css';
-import { Sparkles, ChevronDown, ChevronUp, Volume2, Check } from 'lucide-react';
 
 export default function Home() {
-    const [unprocessedCount, setUnprocessedCount] = useState(0);
-    const [loading, setLoading] = useState(true);
-    const [latestMemo, setLatestMemo] = useState(null);
-    const [isGenerating, setIsGenerating] = useState(false);
-    const [showAlts, setShowAlts] = useState(false);
+    const [memo, setMemo] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [errorLine, setErrorLine] = useState('');
 
-    const fetchCount = async () => {
+    // Real counts for buttons
+    const [queueCount, setQueueCount] = useState(0);
+
+    const loadCounts = () => {
+        getMemos('unprocessed').then(ms => setQueueCount(ms.length));
+    };
+
+    useEffect(() => {
+        loadCounts();
+    }, [memo]);
+
+    const handleMemoSubmit = async (text) => {
+        setLoading(true);
+        setMemo({ jpText: text });
+        setErrorLine('');
+
         try {
-            const memos = await getMemos('unprocessed');
-            setUnprocessedCount(memos.length);
-        } catch (e) {
-            console.error(e);
+            // 1. Save to DB (Unprocessed)
+            const saved = await addMemo(text);
+            setMemo(prev => ({ ...prev, id: saved.id }));
+
+            // 2. Call AI
+            const res = await fetch('/api/translate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ jpText: text })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Translation failed');
+
+            // 3. Update with AI result
+            setMemo(prev => ({ ...prev, aiCache: data }));
+            loadCounts(); // Update count immediately (though technically +1 unprocessed)
+
+        } catch (err) {
+            console.error(err);
+            setErrorLine(err.message || "Error generating text.");
         } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => {
-        fetchCount();
-    }, []);
-
-    const handleSave = async (newMemo) => {
-        await fetchCount();
-        setLatestMemo(newMemo);
-        setIsGenerating(true);
-        setShowAlts(false); // Reset alts visibility
-
-        try {
-            const res = await fetch('/api/translate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ jpText: newMemo.jpText }),
-            });
-
-            // Even if 400/500, we expect JSON error from our API
-            const aiResult = await res.json();
-
-            // Update DB with result
-            const updated = await updateMemo(newMemo.id, { aiCache: aiResult });
-            setLatestMemo(updated);
-        } catch (e) {
-            console.error("Generation failed", e);
-            const errorResult = {
-                best: "通信エラー",
-                alts: ["ネット接続を確認してください"],
-                notes: "サーバーに接続できませんでした",
-                example: "Network Error",
-                pronounceText: "Error"
-            };
-            const updated = await updateMemo(newMemo.id, { aiCache: errorResult });
-            setLatestMemo(updated);
-        } finally {
-            setIsGenerating(false);
+    const handleMarkDone = async () => {
+        if (memo && memo.id) {
+            await updateMemo(memo.id, { status: 'done' });
+            setMemo(null); // Clear result view
+            loadCounts();
         }
     };
 
-    const playAudio = (text) => {
-        if (!window.speechSynthesis) return;
-        const uttr = new SpeechSynthesisUtterance(text);
-        uttr.lang = 'en-US';
-        window.speechSynthesis.speak(uttr);
-    };
-
     return (
-        <main className={styles.container}>
-            <div className={styles.header}>
-                <h1 className={styles.title}>Instant Memo</h1>
-                <Link href="/queue" className={styles.counterLink}>
-                    未処理: <span className={styles.count}>{loading ? '-' : unprocessedCount}</span>
+        <main className={styles.main}>
+            <header className={styles.header}>
+                <div className={styles.logo}>Instant Memo</div>
+                <Link href="/test" className={styles.testLink}>
+                    Test Mode
                 </Link>
-            </div>
+            </header>
 
-            {/* Input Section */}
-            <div className={styles.inputSection}>
-                <MemoInput onSave={handleSave} />
-            </div>
-
-            {/* Immediate Result Section */}
-            {latestMemo && (
-                <div className={styles.resultCard}>
-                    <div className={styles.resultHeader}>
-                        <span className={styles.jpPreview}>{latestMemo.jpText}</span>
-                        {isGenerating && <span className={styles.generating}><Sparkles size={14} /> 変換中...</span>}
-                    </div>
-
-                    {!isGenerating && latestMemo.aiCache && (
-                        <div className={styles.resultBody}>
-                            <div className={styles.bestContainer}>
-                                <div className={styles.bestLabel}>おすすめ (Best)</div>
-                                <div className={styles.bestText}>
-                                    {latestMemo.aiCache.best}
-                                    <button onClick={() => playAudio(latestMemo.aiCache.best)} className={styles.iconBtn}>
-                                        <Volume2 size={18} />
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className={styles.altsContainer}>
-                                <button
-                                    className={styles.altsToggle}
-                                    onClick={() => setShowAlts(!showAlts)}
-                                >
-                                    {showAlts ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                                    他の言い方 (Alternatives)
-                                </button>
-
-                                {showAlts && (
-                                    <ul className={styles.altsList}>
-                                        {latestMemo.aiCache.alts.map((alt, i) => (
-                                            <li key={i}>{alt}</li>
-                                        ))}
-                                    </ul>
-                                )}
-                            </div>
+            <div className={styles.scrollArea}>
+                {/* Navigation Cards - Always Visible */}
+                <div className={styles.navGrid}>
+                    <Link href="/queue" className={styles.navCard}>
+                        <div className={styles.navIconBox}><List size={24} /></div>
+                        <div className={styles.navInfo}>
+                            <span className={styles.navLabel}>未処理リスト</span>
+                            <span className={styles.navCount}>{queueCount}件</span>
                         </div>
-                    )}
-                </div>
-            )}
+                        <ArrowRight size={20} className={styles.navArrow} />
+                    </Link>
 
-            {!latestMemo && (
-                <p className={styles.hint}>
-                    会話で言えなかったことを日本語でメモ。<br />
-                    AIがすぐに英語にしてくれます。
-                </p>
-            )}
+                    <Link href="/archive" className={styles.navCard}>
+                        <div className={styles.navIconBox}><CheckCircle size={24} /></div>
+                        <div className={styles.navInfo}>
+                            <span className={styles.navLabel}>完了リスト</span>
+                        </div>
+                        <ArrowRight size={20} className={styles.navArrow} />
+                    </Link>
+                </div>
+
+                {/* Current Result Display (Below Cards) */}
+                {memo ? (
+                    <div className={styles.resultContainer}>
+                        <div className={styles.resultHeader}>New Memo</div>
+                        <MemoResult memo={memo} isGenerating={loading} onMarkDone={handleMarkDone} />
+                        {errorLine && <div className={styles.error}>{errorLine}</div>}
+
+                        {!loading && memo.aiCache && (
+                            <div className={styles.resultActions}>
+                                <button className={styles.actionBtnDone} onClick={handleMarkDone}>
+                                    <Check size={18} /> 完了にする
+                                </button>
+                                <button className={styles.actionBtnSecondary} onClick={() => setMemo(null)}>
+                                    閉じる (あとでやる)
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    /* Placeholder */
+                    <div className={styles.placeholder}>
+                        <p>最近のメモはありません。<br />下のフォームから入力してください。</p>
+                    </div>
+                )}
+            </div>
+
+            <div className={styles.inputWrapper}>
+                <MemoInput onSubmit={handleMemoSubmit} disabled={loading} />
+            </div>
         </main>
     );
 }

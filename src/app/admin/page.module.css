@@ -1,0 +1,167 @@
+.container {
+    padding: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+    background: #f4f6f8;
+    min-height: 100vh;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    background: white;
+    padding: 16px 20px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.status {
+    background: #000;
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 99px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.cardHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f0f0f0;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.search input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100%;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.item:hover {
+    background: #fafafa;
+}
+
+.selected {
+    border-color: #2563eb;
+    background: #eff6ff;
+}
+
+.uEmail {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.uMeta {
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.uCredits {
+    font-weight: bold;
+    color: #2563eb;
+}
+
+.stats {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.statBox {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+    flex: 1;
+    text-align: center;
+}
+
+.statBox label {
+    display: block;
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.statBox span {
+    font-size: 1.2rem;
+    font-weight: 800;
+}
+
+.actions label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.btnRow {
+    display: flex;
+    gap: 10px;
+}
+
+.btnRow button {
+    background: #2563eb;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.btnRow .btnDanger {
+    background: #dc2626;
+}

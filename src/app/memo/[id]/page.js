@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Sparkles, Loader2 } from 'lucide-react';
+import { ArrowLeft, Sparkles, Loader2, Check } from 'lucide-react';
 import { getMemo, updateMemo } from '../../../lib/db';
 import MemoResult from '../../../components/MemoResult';
 import styles from './page.module.css';
@@ -116,6 +116,15 @@ export default function MemoDetail({ params }) {
                     onMarkDone={handleMarkDone}
                     isGenerating={generating}
                 />
+            )}
+
+            {/* Complete Button Footer */}
+            {memo.status === 'unprocessed' && memo.aiCache && !generating && (
+                <div className={styles.footerAction}>
+                    <button className={styles.completeButton} onClick={handleMarkDone}>
+                        <Check size={20} /> 復習完了 (リストから消す)
+                    </button>
+                </div>
             )}
         </main >
     );

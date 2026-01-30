@@ -32,5 +32,11 @@
 }
 
 .active {
-    color: var(--color-foreground);
+    color: var(--color-primary);
+    background: rgba(37, 99, 235, 0.1);
+    border-radius: 12px;
+}
+
+.active .label {
+    font-weight: 700;
 }
