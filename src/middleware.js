@@ -9,9 +9,9 @@ const isPublicRoute = createRouteMatcher([
     '/insights(.*)',
     '/archive(.*)',
     '/memo(.*)',
-    '/api/translate(.*)',
+    // '/api/translate(.*)', // Removed to enforce Auth
     '/api/test(.*)',
-    '/api/grade(.*)',
+    // '/api/grade(.*)', // Removed to enforce Auth
     '/sign-in(.*)',
     '/sign-up(.*)'
 ]);
