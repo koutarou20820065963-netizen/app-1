@@ -1,12 +1,29 @@
 import { NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
+import prisma from '@/lib/prisma';
 
 export async function POST(req) {
-    try {
-        const { mode, sources } = await req.json();
+    const { userId } = auth();
+    const ownerId = userId || 'demo-user';
 
-        // Sources passed from client (fetched from IndexedDB)
-        // Check if sources have aiCache
-        const candidates = sources ? sources.filter(m => m.aiCache) : [];
+    try {
+        const { mode } = await req.json(); // mode: 'review' or 'new'
+
+        // Fetch candidates (unprocessed or due for review)
+        // For simple logic: fetch ALL unprocessed, plus DONE/Review items that are due
+        const now = new Date();
+        const candidates = await prisma.memo.findMany({
+            where: {
+                userId: ownerId,
+                OR: [
+                    { status: 'unprocessed' },
+                    {
+                        status: 'done',
+                        nextReviewAt: { lte: now }
+                    }
+                ]
+            }
+        });
 
         let questions = [];
 
@@ -17,15 +34,14 @@ export async function POST(req) {
             questions = shuffled.map((memo, idx) => ({
                 id: idx + 1,
                 memoId: memo.id,
-                level: memo.review?.level || 0, // NEW: Pass level
+                level: memo.level,
                 type: 'translation',
                 text: `「${memo.jpText}」を英語で言うと？`,
                 hint: 'Remember your memo...',
-                answer: memo.aiCache.english || memo.aiCache.best
+                answer: memo.enText || "Translation not found" // Fallback if no translation cached
             }));
         }
 
-        // No fallback. If empty, client handles it.
         return NextResponse.json({ questions });
 
     } catch (e) {

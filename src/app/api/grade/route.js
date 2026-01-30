@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
+import prisma from '@/lib/prisma';
 import OpenAI from 'openai';
 
 export async function POST(req) {
+    const { userId } = auth();
+    const ownerId = userId || 'demo-user';
+
     try {
         const { question, userAnswer, correctAnswer, memoId, currentLevel = 0 } = await req.json();
 
@@ -47,37 +52,58 @@ Return JSON:
         }
 
         // 2. SRS Logic (Spaced Repetition)
-        // Levels: 0 (New) -> 1 (1d) -> 2 (3d) -> 3 (7d) -> 4 (14d) -> 5 (30d) -> Done
         const intervals = [0, 1, 3, 7, 14, 30];
         let nextLevel = currentLevel;
         let nextInterval = 0;
-        let markAsDone = false;
+        let newStatus = 'unprocessed';
 
         if (result.score >= 80) {
             nextLevel = currentLevel + 1;
             if (nextLevel >= intervals.length) {
-                markAsDone = true; // Graduate
+                newStatus = 'done'; // Graduate
+                nextLevel = intervals.length; // Max level
+                nextInterval = 0; // No more reviews needed? Or keep scheduling for fun? let's mark done.
             } else {
                 nextInterval = intervals[nextLevel];
+                // If it was 'done' but we reviewed it, does it stay done? 
+                // Usually if we pass, we just schedule next. 
+                // But for this app, 'done' means graduated. 
+                // Let's keep it 'unprocessed' (active) until graduated.
+                newStatus = 'unprocessed';
             }
         } else if (result.score < 50) {
             // Regress
             nextLevel = Math.max(0, currentLevel - 1);
             nextInterval = 1; // Review tomorrow
+            newStatus = 'unprocessed';
         } else {
             // Keep same
             nextInterval = 1;
+            newStatus = 'unprocessed';
         }
 
         const now = new Date();
         const nextReviewDate = new Date();
         nextReviewDate.setDate(now.getDate() + nextInterval);
 
+        // 3. Update DB
+        if (memoId) {
+            await prisma.memo.update({
+                where: { id: memoId, userId: ownerId },
+                data: {
+                    level: nextLevel,
+                    interval: nextInterval,
+                    nextReviewAt: nextReviewDate,
+                    status: newStatus
+                }
+            });
+        }
+
         result.srs = {
             level: nextLevel,
             interval: nextInterval,
             nextReviewAt: nextReviewDate.toISOString(),
-            markAsDone
+            markAsDone: newStatus === 'done'
         };
 
         return NextResponse.json(result);

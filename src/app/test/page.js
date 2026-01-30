@@ -58,26 +58,16 @@ export default function TestPage() {
     const loadQuestions = async () => {
         setLoading(true);
         try {
-            // Fetch local unprocessed memos
-            // We need to dynamic import or use the imported getMemos
-            const { getMemos } = await import('../../lib/db');
-            const unprocessed = await getMemos('unprocessed');
-
-            if (unprocessed.length === 0) {
-                setQuestions([]);
-                return;
-            }
-
+            // Fetch directly from API
             const res = await fetch('/api/test/generate', {
                 method: 'POST',
-                body: JSON.stringify({
-                    mode: 'custom',
-                    sources: unprocessed
-                })
+                body: JSON.stringify({ mode: 'custom' })
             });
             const data = await res.json();
             if (data.questions && data.questions.length > 0) {
                 setQuestions(data.questions);
+            } else {
+                setQuestions([]); // No questions
             }
         } catch (e) {
             console.error(e);
@@ -129,23 +119,11 @@ export default function TestPage() {
             const result = await res.json();
             setResults({ ...results, [q.id]: result });
 
-            // Client-side Update (SRS)
-            if (q.memoId && result.srs) {
-                const { updateMemo } = await import('../../lib/db');
-                const updates = {
-                    review: {
-                        level: result.srs.level,
-                        interval: result.srs.interval,
-                        nextReviewAt: result.srs.nextReviewAt
-                    }
-                };
-
-                // If graduated, mark done
-                if (result.srs.markAsDone) {
-                    updates.status = 'done';
-                }
-
-                await updateMemo(q.memoId, updates);
+            // Client-Side Update (Optional: could just rely on re-fetch)
+            // But since we are inside a test session, we might just continue.
+            // The API already updated the DB.
+            if (result.srs && result.srs.markAsDone) {
+                // Show completion UI or toast if needed
             }
 
         } catch (e) {

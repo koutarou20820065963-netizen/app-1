@@ -41,7 +41,7 @@ export default function Home() {
                 body: JSON.stringify({ jpText: text })
             });
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Translation failed');
+            if (!res.ok) throw new Error(data.detail || data.error || 'Translation failed');
 
             // 3. Update with AI result
             setMemo(prev => ({ ...prev, aiCache: data }));

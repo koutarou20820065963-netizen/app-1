@@ -18,29 +18,7 @@ export async function POST(req) {
         const session = auth();
         userId = session.userId;
 
-        // Check limits if logged in
-        if (userId) {
-            const limitCheck = await checkRateLimit(userId);
-            if (!limitCheck.allowed) {
-                return NextResponse.json({ error: limitCheck.reason }, { status: 429 });
-            }
-            if (process.env.OPENAI_API_KEY) {
-                // Credit check
-                // For now, if mock mode, skip credit deduction to avoid database errors if table missing
-                // but typically we want it. User prioritized stability.
-                try {
-                    const canProceed = await hasCredit(userId, 1);
-                    if (!canProceed) {
-                        return NextResponse.json({ error: 'Insufficient credits' }, { status: 402 });
-                    }
-                    await addTransaction(userId, -1, 'translate', 'api');
-                    deducted = true;
-                } catch (e) {
-                    console.warn("Credit check failed (ignoring for dev stability):", e);
-                }
-            }
-        }
-
+        // Personal Use: Skip all credit/rate limit checks
         const apiKey = process.env.OPENAI_API_KEY;
         let result;
 
@@ -124,9 +102,6 @@ Return strict JSON:
     } catch (error) {
         console.error('Translation error:', error);
 
-        if (userId && deducted) {
-            try { await addTransaction(userId, 1, 'refund', 'system', { error: error.message }); } catch (e) { }
-        }
 
         return NextResponse.json({
             error: 'Generation failed',
