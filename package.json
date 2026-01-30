@@ -23,8 +23,5 @@
     "react": "latest",
     "react-dom": "latest",
     "stripe": "^14.14.0"
-  },
-  "devDependencies": {
-    "dotenv-cli": "^11.0.0"
   }
 }
