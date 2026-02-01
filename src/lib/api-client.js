@@ -8,7 +8,16 @@ async function fetchAPI(endpoint, options = {}) {
             ...options.headers
         }
     });
-    if (!res.ok) throw new Error('API Error');
+    if (!res.ok) {
+        let errorMsg = 'API Error';
+        try {
+            const data = await res.json();
+            errorMsg = data.error || data.detail || `API Error ${res.status}`;
+        } catch (e) {
+            errorMsg = `API Error ${res.status}: ${res.statusText}`;
+        }
+        throw new Error(errorMsg);
+    }
     return res.json();
 }
 
