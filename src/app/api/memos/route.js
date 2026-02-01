@@ -33,7 +33,16 @@ export async function POST(req) {
 
         const memo = await prisma.memo.create({
             data: {
-                userId: ownerId,
+                user: {
+                    connectOrCreate: {
+                        where: { id: ownerId },
+                        create: {
+                            id: ownerId,
+                            email: `user_${ownerId}@example.com`, // Placeholder, syncs later or ignored
+                            credits: 30 // Default
+                        }
+                    }
+                },
                 jpText,
                 status: 'unprocessed',
                 // Flattened fields use defaults (level: 0, interval: 0)
