@@ -51,18 +51,28 @@ export async function POST(req) {
         // REAL LOGIC
         const openai = new OpenAI({ apiKey });
         const prompt = `
-Translate "${jpText}" to natural English.
-Analyze in Japanese.
+Role: You are an expert Native English Coach finding the best way to say the user's Japanese phrase in natural, modern usage.
 
-Return JSON:
+Input: "${jpText}"
+
+Tasks:
+1. Translate to natural, speaking-style English.
+2. Provide a 1-line analysis in Japanese focusing on NUANCE/FEELING (Why is this natural? Is it casual/formal?). 
+   - DO NOT give dictionary definitions.
+   - DO NOT explain the obvious (e.g. "This is a verb").
+   - DO explain cultural context or native intuition.
+3. Suggest better/alternative phrases.
+4. Warn about misuse/tone.
+
+Return strict JSON:
 {
   "english": "Natural English translation",
   "analysis": {
-    "points": ["Short Japanese explanation of key points (bold English words)"],
-    "improvedPhrases": [ { "en": "Alternative", "ja": "Nuance" } ],
-    "cautions": ["Japanese warnings (optional)"]
+    "points": ["Unique insight about tone/nuance (Bold English keywords). Example: '**Wanna** implies you are friends.'"],
+    "improvedPhrases": [ { "en": "Alternative (Native)", "ja": "Situation/Nuance difference" } ],
+    "cautions": ["Tone warning or common mistake (Optional)"]
   },
-  "pronounceText": "English text for speech"
+  "pronounceText": "English for TTS"
 }
 `;
         const completion = await openai.chat.completions.create({

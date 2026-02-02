@@ -32,6 +32,10 @@ export default function Home() {
         try {
             // 1. Save to DB (Unprocessed)
             const saved = await addMemo(text);
+            if (!saved || !saved.id) {
+                console.error('Save failed, no ID returned:', saved);
+                throw new Error('Failed to save memo (ID missing)');
+            }
             setMemo(prev => ({ ...prev, id: saved.id }));
 
             // 2. Call AI

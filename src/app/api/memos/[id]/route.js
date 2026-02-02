@@ -5,7 +5,7 @@ import prisma from '@/lib/prisma';
 export async function GET(req, { params }) {
     const { userId } = auth();
     const ownerId = userId || 'demo-user';
-    const { id } = params;
+    const { id } = await params;
 
     try {
         const memo = await prisma.memo.findFirst({
@@ -21,7 +21,7 @@ export async function GET(req, { params }) {
 export async function PATCH(req, { params }) {
     const { userId } = auth();
     const ownerId = userId || 'demo-user';
-    const { id } = params;
+    const { id } = await params;
 
     try {
         const updates = await req.json();
@@ -53,7 +53,7 @@ export async function PATCH(req, { params }) {
 export async function DELETE(req, { params }) {
     const { userId } = auth();
     const ownerId = userId || 'demo-user';
-    const { id } = params;
+    const { id } = await params;
 
     try {
         await prisma.memo.delete({
