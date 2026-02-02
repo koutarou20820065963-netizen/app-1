@@ -51,34 +51,18 @@ export async function POST(req) {
         // REAL LOGIC
         const openai = new OpenAI({ apiKey });
         const prompt = `
-You are a helpful English teacher for Japanese speakers.
-The user wants to express: "${jpText}"
+Translate "${jpText}" to natural English.
+Analyze in Japanese.
 
-Task:
-1. Translate to natural, speaking-style English ("english").
-2. Analyze the translation mainly in JAPANESE ("analysis").
-
-analysis requirements:
-- "points": [Array of strings] 
-   - Explain in JAPANESE. 
-   - When referring to specific English words/grammar, use bold formatting like **word**.
-   - Do NOT add English translations in brackets for the whole sentence.
-   - Example: "**Have been** を使うことで、過去から現在までの継続を表しています。"
-- "improvedPhrases": [Array of objects {en, ja}] 
-   - Alternative natural expressions.
-- "cautions": [Array of strings] 
-   - Explain nuances or warnings in JAPANESE.
-   - Example: "**Wanna** は非常にくだけた表現なので、親しい間柄でのみ使います。"
-
-Return strict JSON:
+Return JSON:
 {
-  "english": "string",
+  "english": "Natural English translation",
   "analysis": {
-    "points": ["string"],
-    "improvedPhrases": [ { "en": "string", "ja": "string" } ],
-    "cautions": ["string"]
+    "points": ["Short Japanese explanation of key points (bold English words)"],
+    "improvedPhrases": [ { "en": "Alternative", "ja": "Nuance" } ],
+    "cautions": ["Japanese warnings (optional)"]
   },
-  "pronounceText": "string"
+  "pronounceText": "English text for speech"
 }
 `;
         const completion = await openai.chat.completions.create({

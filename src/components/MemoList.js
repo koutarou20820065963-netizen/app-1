@@ -96,7 +96,7 @@ export default function MemoList({ memos, emptyMessage = 'メモはありませ�
 function SwipeableItem({ memo, formatDate, onAction }) {
     const [startX, setStartX] = useState(null);
     const [offsetX, setOffsetX] = useState(0);
-    const threshold = 100; // Require a decent swipe
+    const threshold = 50; // Easier swipe
 
     const handleTouchStart = (e) => {
         setStartX(e.touches[0].clientX);
@@ -154,10 +154,15 @@ function SwipeableItem({ memo, formatDate, onAction }) {
                 <Link href={`/memo/${memo.id}`} className={styles.linkOverlay}>
                     <div className={styles.content}>
                         <p className={styles.text}>{memo.jpText}</p>
+                        {/* English Subtext */}
+                        {(memo.enText || (memo.aiCache && memo.aiCache.english)) && (
+                            <p className={styles.subtext}>
+                                {memo.enText || memo.aiCache.english}
+                            </p>
+                        )}
                         <div className={styles.meta}>
                             <Clock size={12} className={styles.icon} />
                             <span>{formatDate(memo.createdAt)}</span>
-                            {memo.aiCache && <span className={styles.badge}>EN</span>}
                         </div>
                     </div>
                 </Link>

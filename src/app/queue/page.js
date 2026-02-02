@@ -16,17 +16,21 @@ export default function QueuePage() {
     const [search, setSearch] = useState('');
     const [sortMode, setSortMode] = useState('newest'); // newest, oldest, review
 
+    const [loading, setLoading] = useState(true);
+
     useEffect(() => {
         loadMemos();
     }, [tab]);
 
     const loadMemos = async () => {
-        // Build custom fetcher if needed, but getMemos gets by simple status
-        // For 'review', it's technically 'unprocessed' BUT nextReviewAt < now
-        // For 'done', it's 'done'
-        const statusToFetch = tab === 'review' ? 'unprocessed' : tab;
-        const data = await getMemos(statusToFetch);
-        setMemos(data);
+        setLoading(true);
+        try {
+            const statusToFetch = tab === 'review' ? 'unprocessed' : tab;
+            const data = await getMemos(statusToFetch);
+            setMemos(data);
+        } finally {
+            setLoading(false);
+        }
     };
 
     // Apply Logic
@@ -106,11 +110,15 @@ export default function QueuePage() {
 
             {/* List */}
             <div className={styles.listArea}>
-                <MemoList
-                    memos={filtered}
-                    onRefresh={loadMemos}
-                    emptyMessage={tab === 'review' ? "今日の復習はありません！" : "メモはありません。"}
-                />
+                {loading ? (
+                    <div className={styles.loading}>Loading...</div>
+                ) : (
+                    <MemoList
+                        memos={filtered}
+                        onRefresh={loadMemos}
+                        emptyMessage={tab === 'review' ? "今日の復習はありません！" : "メモはありません。"}
+                    />
+                )}
             </div>
         </div>
     );

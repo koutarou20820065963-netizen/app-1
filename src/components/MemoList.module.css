@@ -54,9 +54,18 @@
 
 .text {
     font-size: 1rem;
-    margin-bottom: 6px;
-    line-height: 1.4;
     font-weight: 500;
+    margin-bottom: 4px;
+    color: var(--color-text);
+}
+
+.subtext {
+    font-size: 0.85rem;
+    color: #888;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .meta {
