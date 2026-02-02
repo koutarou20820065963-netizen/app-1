@@ -45,6 +45,15 @@ export default function Home() {
 
             // 3. Update with AI result
             setMemo(prev => ({ ...prev, aiCache: data }));
+
+            // 4. Persist to DB!
+            // We store the main English translation in enText. 
+            // If we want to store the full analysis, we might need a JSON column or reuse 'tags' if valid JSON.
+            // For now, enText is critical for the list view.
+            await updateMemo(saved.id, {
+                enText: data.english
+            });
+
             loadCounts(); // Update count immediately (though technically +1 unprocessed)
 
         } catch (err) {

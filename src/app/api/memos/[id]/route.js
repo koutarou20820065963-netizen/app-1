@@ -2,6 +2,22 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import prisma from '@/lib/prisma';
 
+export async function GET(req, { params }) {
+    const { userId } = auth();
+    const ownerId = userId || 'demo-user';
+    const { id } = params;
+
+    try {
+        const memo = await prisma.memo.findFirst({
+            where: { id, userId: ownerId }
+        });
+        if (!memo) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+        return NextResponse.json(memo);
+    } catch (e) {
+        return NextResponse.json({ error: e.message }, { status: 500 });
+    }
+}
+
 export async function PATCH(req, { params }) {
     const { userId } = auth();
     const ownerId = userId || 'demo-user';
