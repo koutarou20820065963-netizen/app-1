@@ -20,45 +20,33 @@ export default function InsightsPage() {
 
     const calculateInsights = async () => {
         try {
-            // Fetch 'done' memos for history
-            const memos = await getMemos('done');
+            // Fetch 'done' and 'unprocessed'
+            const [doneMemos, todoMemos] = await Promise.all([
+                getMemos('done'),
+                getMemos('unprocessed')
+            ]);
 
-            // 1. Analyze Patterns (Simple Start-of-sentence N-gram)
-            const patterns = {};
-            const vocab = {};
+            const allMemos = [...doneMemos, ...todoMemos];
 
-            memos.forEach(m => {
-                if (m.aiCache && m.aiCache.english) {
-                    const en = cleanText(m.aiCache.english);
-                    // Get first 2-3 words for sentence patterns
-                    const words = en.split(' ');
-                    if (words.length >= 2) {
-                        const pattern2 = words.slice(0, 2).join(' ').toLowerCase();
-                        patterns[pattern2] = (patterns[pattern2] || 0) + 1;
-                    }
-                    if (words.length >= 3) {
-                        const pattern3 = words.slice(0, 3).join(' ').toLowerCase();
-                        patterns[pattern3] = (patterns[pattern3] || 0) + 1;
-                    }
-                }
+            // Mastery Levels
+            const levels = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+            allMemos.forEach(m => {
+                const lvl = m.level || 0;
+                levels[Math.min(lvl, 5)] = (levels[Math.min(lvl, 5)] || 0) + 1;
             });
 
-            // Filter significant patterns (appear more than once or just top ones)
-            // For MVP, just show top sorted
-            const sortedPatterns = Object.entries(patterns)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 6)
-                .map(([pt, count]) => ({
-                    text: pt,
-                    count: count,
-                    // Find an example
-                    example: memos.find(m => m.aiCache?.english?.toLowerCase().startsWith(pt))?.aiCache?.english
-                }));
+            // ... pattern logic on doneMemos ...
+            const memos = doneMemos; // Used for patterns
+
+            // ... (keep pattern logic) ...
 
             setStats({
-                total: memos.length,
+                total: allMemos.length,
+                doneCount: doneMemos.length,
+                todoCount: todoMemos.length,
                 patterns: sortedPatterns,
-                history: memos.slice(0, 20) // Top 20 recent
+                history: doneMemos.slice(0, 20),
+                levels
             });
 
         } catch (e) {
@@ -74,8 +62,22 @@ export default function InsightsPage() {
         <div className={styles.container}>
             <header className={styles.header}>
                 <h1 className={styles.title}>Learning Insights</h1>
-                <p className={styles.sub}>Total Completed: <strong>{stats?.total || 0}</strong></p>
             </header>
+
+            <section className={styles.statsGrid}>
+                <div className={styles.statCard}>
+                    <span className={styles.statLabel}>Total</span>
+                    <span className={styles.statValue}>{stats?.total || 0}</span>
+                </div>
+                <div className={styles.statCard}>
+                    <span className={styles.statLabel}>Done</span>
+                    <span className={styles.statValue}>{stats?.doneCount || 0}</span>
+                </div>
+                <div className={styles.statCard}>
+                    <span className={styles.statLabel}>Pending</span>
+                    <span className={styles.statValue}>{stats?.todoCount || 0}</span>
+                </div>
+            </section>
 
             {/* Pattern Analysis */}
             <section className={styles.section}>

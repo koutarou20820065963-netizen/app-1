@@ -202,3 +202,64 @@
     opacity: 1;
     transform: translateX(-50%) translateY(0);
 }
+
+.pointItem {
+    margin-bottom: 12px;
+}
+
+.pointEn {
+    font-weight: 500;
+    color: var(--color-foreground);
+    margin-bottom: 2px;
+}
+
+.pointJa {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+.pointTag {
+    display: inline-block;
+    font-size: 0.7rem;
+    background: #eee;
+    color: #666;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-top: 4px;
+}
+
+/* Phrases items specifically */
+.phraseItem {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed #eee;
+}
+
+.phraseEn {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--color-foreground);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.phraseJa {
+    font-size: 0.85rem;
+    color: #888;
+    margin-top: 2px;
+}
+
+.cautionItem {
+    margin-bottom: 8px;
+}
+
+.cautionEn {
+    font-weight: 500;
+    color: #d32f2f;
+}
+
+.cautionJa {
+    font-size: 0.85rem;
+    color: #888;
+}

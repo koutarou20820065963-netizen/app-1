@@ -99,7 +99,19 @@ export default function MemoResult({ memo, onMarkDone, isGenerating }) {
                         </div>
                         {expanded.points && (
                             <ul className={styles.pointList}>
-                                {points.map((p, i) => <li key={i}>{cleanText(p)}</li>)}
+                                {points.map((p, i) => {
+                                    const isObj = typeof p === 'object' && p !== null;
+                                    const en = isObj ? p.en : p;
+                                    const ja = isObj ? p.ja : null;
+                                    const grammar = isObj ? p.grammar : null;
+                                    return (
+                                        <li key={i} className={styles.pointItem}>
+                                            <div className={styles.pointEn}>{cleanText(en)}</div>
+                                            {ja && <div className={styles.pointJa}>{cleanText(ja)}</div>}
+                                            {grammar && <div className={styles.pointTag}>{grammar}</div>}
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         )}
                     </div>
@@ -142,7 +154,17 @@ export default function MemoResult({ memo, onMarkDone, isGenerating }) {
                     <div className={styles.cautionBox}>
                         <div className={styles.cautionTitle}><AlertTriangle size={14} /> 注意点</div>
                         <ul className={styles.cautionList}>
-                            {cautions.map((c, i) => <li key={i}>{cleanText(c)}</li>)}
+                            {cautions.map((c, i) => {
+                                const isObj = typeof c === 'object' && c !== null;
+                                const en = isObj ? c.en : c;
+                                const ja = isObj ? c.ja : null;
+                                return (
+                                    <li key={i} className={styles.cautionItem}>
+                                        <div className={styles.cautionEn}>{cleanText(en)}</div>
+                                        {ja && <div className={styles.cautionJa}>{cleanText(ja)}</div>}
+                                    </li>
+                                );
+                            })}
                         </ul>
                     </div>
                 )}

@@ -29,31 +29,39 @@ export default function TestPage() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (SpeechRecognition) {
                 recognition.current = new SpeechRecognition();
-                recognition.current.lang = 'en-US';
+                recognition.current.lang = 'en-US'; // Expecting English answers
                 recognition.current.continuous = false;
                 recognition.current.interimResults = false;
 
+                recognition.current.onstart = () => {
+                    setListening(true);
+                };
+
                 recognition.current.onresult = (event) => {
                     const transcript = event.results[0][0].transcript;
-                    if (questions.length > 0) {
+                    if (questions.length > 0 && questions[currentIndex]) {
                         setAnswers(prev => ({
                             ...prev,
-                            // Use functional index check or just ensure safe access
-                            [questions[currentIndex]?.id]: transcript
+                            [questions[currentIndex].id]: transcript
                         }));
                     }
                     setListening(false);
                 };
 
                 recognition.current.onerror = (e) => {
-                    console.error(e);
+                    console.error("Speech Error:", e.error);
                     setListening(false);
+                    if (e.error === 'not-allowed') {
+                        alert("マイクの使用が許可されていません。設定を確認してください。");
+                    } else if (e.error === 'no-speech') {
+                        // Silent fail is better? Or toast?
+                    }
                 };
 
                 recognition.current.onend = () => setListening(false);
             }
         }
-    }, [questions.length, currentIndex]); // Careful with deps. Questions length changes only once.
+    }, [questions.length]); // Init only once or on question change
 
     const loadQuestions = async () => {
         setLoading(true);

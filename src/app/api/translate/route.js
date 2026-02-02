@@ -68,9 +68,13 @@ Return strict JSON:
 {
   "english": "Natural English translation",
   "analysis": {
-    "points": ["Unique insight about tone/nuance (Bold English keywords). Example: '**Wanna** implies you are friends.'"],
-    "improvedPhrases": [ { "en": "Alternative (Native)", "ja": "Situation/Nuance difference" } ],
-    "cautions": ["Tone warning or common mistake (Optional)"]
+    "points": [
+      { "en": "English explanation or keyword", "ja": "Japanese explanation of nuance", "grammar": "Grammar type (e.g. Verb Tense)" }
+    ],
+    "improvedPhrases": [ { "en": "Alternative", "ja": "Nuance" } ],
+    "cautions": [
+      { "en": "English warning context", "ja": "Japanese warning details" } 
+    ]
   },
   "pronounceText": "English for TTS"
 }
