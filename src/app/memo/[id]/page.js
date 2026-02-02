@@ -54,7 +54,11 @@ export default function MemoDetail({ params }) {
             // Handle error response as valid json fallback if possible
             const aiResult = await res.json();
 
-            const updated = await updateMemo(memo.id, { aiCache: aiResult });
+            const updated = await updateMemo(memo.id, {
+                aiCache: aiResult,
+                enText: aiResult.english,
+                aiData: aiResult
+            });
             setMemo(updated);
         } catch (e) {
             alert('AI生成に失敗しました');
@@ -93,7 +97,7 @@ export default function MemoDetail({ params }) {
             </header>
 
             {/* If no AI result yet and not generating, show original text and convert button */}
-            {!memo.aiCache && !generating && (
+            {!memo.aiCache && !memo.aiData && !memo.enText && !generating && (
                 <>
                     <div className={styles.card}>
                         <h2 className={styles.jpText}>{memo.jpText}</h2>
@@ -110,7 +114,7 @@ export default function MemoDetail({ params }) {
             )}
 
             {/* If has result or is generating, show Result Card */}
-            {(memo.aiCache || generating) && (
+            {(memo.aiCache || memo.aiData || memo.enText || generating) && (
                 <MemoResult
                     memo={memo}
                     onMarkDone={handleMarkDone}

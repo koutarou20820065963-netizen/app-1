@@ -26,6 +26,7 @@ model Memo {
   
   jpText       String
   enText       String?  // Translated/Best Answer
+  aiData       Json?    // Full AI response (analysis, points, etc.)
   status       String   @default("unprocessed") // "unprocessed", "done"
   
   // SRS Data

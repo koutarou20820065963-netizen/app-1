@@ -16,14 +16,19 @@ export default function MemoResult({ memo, onMarkDone, isGenerating }) {
         );
     }
 
-    if (!memo || !memo.aiCache) return null;
+    const { aiCache, aiData, enText } = memo;
+    const cache = aiCache || aiData;
 
-    const { aiCache } = memo;
-    const english = aiCache.english || aiCache.best;
-    const analysis = aiCache.analysis || {};
+    // Fallback: If no cache but enText exists (legacy partial), mock a cache
+    const effectiveCache = cache || (enText ? { english: enText } : null);
+
+    if (!effectiveCache) return null;
+
+    const english = effectiveCache.english || effectiveCache.best;
+    const analysis = effectiveCache.analysis || {};
     const { points = [], improvedPhrases = [], cautions = [] } = analysis;
 
-    if (!aiCache.english && !aiCache.best) return null;
+    if (!english) return null;
 
     const [expanded, setExpanded] = useState({ points: true, phrases: true });
     const [showToast, setShowToast] = useState(false);

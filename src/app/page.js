@@ -51,7 +51,8 @@ export default function Home() {
             // If we want to store the full analysis, we might need a JSON column or reuse 'tags' if valid JSON.
             // For now, enText is critical for the list view.
             await updateMemo(saved.id, {
-                enText: data.english
+                enText: data.english,
+                aiData: data
             });
 
             loadCounts(); // Update count immediately (though technically +1 unprocessed)
