@@ -106,12 +106,23 @@ export default function MemoResult({ memo, onMarkDone, isGenerating }) {
                         <div className={styles.politenessRow}>
                             <span className={styles.contextLabel}>丁寧さ:</span>
                             <div className={styles.politenessMeter}>
-                                {[1, 2, 3, 4, 5].map(l => (
-                                    <div
-                                        key={l}
-                                        className={`${styles.levelDot} ${l <= analysis.politeness.level ? styles.activeLevel : ''}`}
-                                    />
-                                ))}
+                                {[1, 2, 3, 4, 5].map(l => {
+                                    // Dynamic Colors
+                                    let color = '#eee';
+                                    if (l <= analysis.politeness.level) {
+                                        const lev = analysis.politeness.level;
+                                        if (lev <= 2) color = '#F59E0B';      // Casual (Amber)
+                                        else if (lev === 3) color = '#10B981'; // Neutral (Green)
+                                        else color = '#6366F1';               // Formal (Indigo)
+                                    }
+                                    return (
+                                        <div
+                                            key={l}
+                                            className={styles.levelDot}
+                                            style={{ backgroundColor: color }}
+                                        />
+                                    );
+                                })}
                                 <span className={styles.politenessDesc}>{analysis.politeness.description}</span>
                             </div>
                         </div>

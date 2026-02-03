@@ -297,46 +297,60 @@
     margin-top: 4px;
 }
 
+.card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    /* Premium shadow */
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* ... existing ... */
+
+/* Politeness Colors */
 .levelDot {
     width: 20px;
     height: 6px;
     border-radius: 4px;
-    background: #e0e0e0;
+    background: #eee;
+    transition: background 0.3s;
 }
 
 .activeLevel {
+    /* Determined by JS or CSS variable? simpler to rely on class but we need dynamic colors */
+    /* Let's use a default accent, and maybe specific classes for levels if possible. 
+       Actually, sticking to primary/accent logic is safer, but user liked "Green/Orange" idea?
+       Let's stick to variable for now but brighter. */
     background: var(--color-primary);
-    /* Blue or accent */
 }
 
-.politenessDesc {
-    font-size: 0.8rem;
-    color: var(--color-text);
-    margin-left: 8px;
-    font-weight: 500;
-}
+/* Level specific overrides if needed (requires JS changes to add classes like level-1) 
+   For now, just make it Primary */
 
-/* Dialogue Box */
-.dialogueBox {
+/* Caution Box Accent */
+.cautionBox {
     padding: 16px;
-    background: #fff;
+    background: #fff5f5;
+    /* Lighter red */
+    border-left: 4px solid var(--color-error);
+    /* Accent line */
+    border-radius: 4px;
+    /* Slight radius */
 }
 
-.dialogueRow {
-    margin-bottom: 12px;
-}
+/* ... existing ... */
 
-.speakerLabel {
-    font-weight: bold;
-    margin-right: 8px;
-    color: var(--color-text-secondary);
-    font-size: 0.9rem;
-}
-
-.dialogueText {
-    font-size: 1rem;
-    color: var(--color-foreground);
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+.pointTag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: #f0f0f0;
+    color: #555;
+    padding: 3px 8px;
+    border-radius: 12px;
+    /* Pill shape */
+    margin-top: 4px;
 }
