@@ -263,3 +263,80 @@
     font-size: 0.85rem;
     color: #888;
 }
+
+/* Rich Context & Politeness */
+.contextBox {
+    padding: 16px;
+    background: #f8f9fa;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.contextRow,
+.politenessRow {
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.contextRow:last-child {
+    margin-bottom: 0;
+}
+
+.contextLabel {
+    font-weight: bold;
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.politenessMeter {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.levelDot {
+    width: 20px;
+    height: 6px;
+    border-radius: 4px;
+    background: #e0e0e0;
+}
+
+.activeLevel {
+    background: var(--color-primary);
+    /* Blue or accent */
+}
+
+.politenessDesc {
+    font-size: 0.8rem;
+    color: var(--color-text);
+    margin-left: 8px;
+    font-weight: 500;
+}
+
+/* Dialogue Box */
+.dialogueBox {
+    padding: 16px;
+    background: #fff;
+}
+
+.dialogueRow {
+    margin-bottom: 12px;
+}
+
+.speakerLabel {
+    font-weight: bold;
+    margin-right: 8px;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+}
+
+.dialogueText {
+    font-size: 1rem;
+    color: var(--color-foreground);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}

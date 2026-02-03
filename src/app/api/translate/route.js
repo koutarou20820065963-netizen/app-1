@@ -68,12 +68,27 @@ Return strict JSON:
 {
   "english": "Natural English translation",
   "analysis": {
-    "points": [
-      { "en": "English explanation or keyword", "ja": "Japanese explanation of nuance", "grammar": "Grammar type (e.g. Verb Tense)" }
+    "context": {
+        "meaning": "Literal meaning vs implied meaning (One sentence). Misconception warning.",
+        "condition": "When/Who to use this with (e.g. 'Only with close ends', 'Avoid in business')."
+    },
+    "politeness": {
+        "level": 3, // 1: Slang/Rude, 3: Neutral, 5: Formal
+        "description": "Casual/Formal"
+    },
+    "dialogue": [
+        { "speaker": "A", "text": "Question/Trigger phrase" },
+        { "speaker": "B", "text": "The translated phrase in context" }
     ],
-    "improvedPhrases": [ { "en": "Alternative", "ja": "Nuance" } ],
+    "points": [
+      { "en": "Grammar/Keyword", "ja": "Nuance explanation", "grammar": "Grammar Tag" }
+    ],
+    "improvedPhrases": [ 
+        { "en": "Alternative 1", "ja": "More Casual/Formal?", "type": "casual" }, 
+        { "en": "Alternative 2", "ja": "Nuance?", "type": "formal" }
+    ],
     "cautions": [
-      { "en": "English warning context", "ja": "Japanese warning details" } 
+      { "en": "Warning", "ja": "Japanese warning" } 
     ]
   },
   "pronounceText": "English for TTS"

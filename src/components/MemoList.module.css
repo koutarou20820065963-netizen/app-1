@@ -42,84 +42,81 @@
     position: relative;
     z-index: 2;
     background: var(--color-surface);
-    padding: 16px;
+    padding: 12px 16px;
+    /* Compact padding */
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.item.exiting {
+    transform: translateX(100%);
+    opacity: 0;
 }
 
 .linkOverlay {
     text-decoration: none;
     color: inherit;
-    display: block;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .text {
     font-size: 1rem;
-    font-weight: 500;
-    margin-bottom: 4px;
+    font-weight: 600;
     color: var(--color-text);
+    margin: 0;
+    line-height: 1.4;
 }
 
 .subtext {
-    font-size: 0.85rem;
-    color: #888;
-    margin-bottom: 8px;
+    font-size: 0.8rem;
+    color: #999;
+    margin: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 1.2;
 }
 
+/* Metadata hidden for compact view as requested */
 .meta {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.75rem;
-    color: var(--color-text-secondary);
+    display: none;
 }
 
-.badge {
-    background: var(--color-surface-hover);
-    padding: 2px 6px;
-    border-radius: 4px;
+/* Action Text */
+.actionText {
+    color: white;
     font-weight: bold;
-    font-size: 0.7rem;
-}
-
-/* Toast */
-.toast {
-    position: fixed;
-    bottom: 80px;
-    /* Above Input Bar */
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--color-foreground);
-    color: var(--color-background);
-    padding: 12px 20px;
-    border-radius: 30px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-    z-index: 100;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.showToast {
-    opacity: 1;
-    visibility: visible;
-    transform: translateX(-50%) translateY(0);
+    font-size: 0.8rem;
+    margin-top: 4px;
 }
 
 .undoButton {
     background: rgba(255, 255, 255, 0.2);
     border: none;
     color: inherit;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.8rem;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     cursor: pointer;
+    font-weight: 600;
+}
+
+.actionIndicator {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 80px;
+    /* Wider for visibility */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    font-size: 0.8rem;
+    color: white;
 }

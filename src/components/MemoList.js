@@ -94,77 +94,99 @@ export default function MemoList({ memos, emptyMessage = 'メモはありませ�
 }
 
 function SwipeableItem({ memo, formatDate, onAction }) {
-    const [startX, setStartX] = useState(null);
     const [offsetX, setOffsetX] = useState(0);
-    const threshold = 50; // Easier swipe
+    const [isExiting, setIsExiting] = useState(false);
+    const startX = useRef(null);
+    const itemRef = useRef(null);
+    const threshold = 70; // Slightly higher threshold to prevent accidental swipes
 
     const handleTouchStart = (e) => {
-        setStartX(e.touches[0].clientX);
+        startX.current = e.touches[0].clientX;
     };
 
     const handleTouchMove = (e) => {
-        if (!startX) return;
+        if (startX.current === null) return;
         const currentX = e.touches[0].clientX;
-        const diff = currentX - startX;
+        const diff = currentX - startX.current;
+        // Limit scroll to horizontal only roughly?
         setOffsetX(diff);
     };
 
     const handleTouchEnd = () => {
         if (offsetX > threshold) {
-            // Right Swipe -> Complete
-            onAction('complete', memo);
+            // Right => Complete
+            triggerAction('complete');
         } else if (offsetX < -threshold) {
-            // Left Swipe -> Delete
-            onAction('delete', memo);
+            // Left => Delete
+            triggerAction('delete');
+        } else {
+            // Reset
+            setOffsetX(0);
         }
-        setOffsetX(0);
-        setStartX(null);
+        startX.current = null;
+    };
+
+    const triggerAction = (type) => {
+        setIsExiting(true);
+        // Wait for animation
+        setTimeout(() => {
+            onAction(type, memo);
+            // We don't reset Exiting here because the item should ideally unmount.
+            // But if it fails, Parent should handle re-fetching.
+        }, 300);
     };
 
     const style = {
         transform: `translateX(${offsetX}px)`,
-        transition: startX ? 'none' : 'transform 0.3s ease',
+        transition: startX.current !== null ? 'none' : 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
+        opacity: isExiting ? 0 : 1
     };
 
+    // Action Background Colors and Icons
     let bgColor = 'transparent';
-    if (offsetX > 20) bgColor = 'var(--color-primary)'; // Blue/Green for Done
-    if (offsetX < -20) bgColor = 'var(--color-error)';   // Red for Delete
+    let leftOpacity = 0;
+    let rightOpacity = 0;
+
+    if (offsetX > 20) {
+        bgColor = 'var(--color-primary)';
+        leftOpacity = Math.min(offsetX / threshold, 1);
+    }
+    if (offsetX < -20) {
+        bgColor = 'var(--color-error)';
+        rightOpacity = Math.min(Math.abs(offsetX) / threshold, 1);
+    }
+
+    if (isExiting) return <div style={{ height: 0, transition: 'height 0.3s', margin: 0 }} />;
 
     return (
         <div className={styles.itemWrapper} style={{ backgroundColor: bgColor }}>
-            {/* Left Background (Visible on Right Swipe) => Complete */}
-            <div className={`${styles.actionIndicator} ${styles.actionLeft}`} style={{ opacity: offsetX > 20 ? 1 : 0 }}>
-                <Check size={28} color="white" />
+            {/* Complete Action (Left) */}
+            <div className={`${styles.actionIndicator} ${styles.actionLeft}`} style={{ opacity: leftOpacity }}>
+                <Check size={28} />
                 <span className={styles.actionText}>完了</span>
             </div>
 
-            {/* Right Background (Visible on Left Swipe) => Delete */}
-            <div className={`${styles.actionIndicator} ${styles.actionRight}`} style={{ opacity: offsetX < -20 ? 1 : 0 }}>
-                <Trash2 size={28} color="white" />
+            {/* Delete Action (Right) */}
+            <div className={`${styles.actionIndicator} ${styles.actionRight}`} style={{ opacity: rightOpacity }}>
+                <Trash2 size={28} />
                 <span className={styles.actionText}>削除</span>
             </div>
 
             <div
-                className={styles.item}
+                className={`${styles.item} ${isExiting ? styles.exiting : ''}`}
                 style={style}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
             >
                 <Link href={`/memo/${memo.id}`} className={styles.linkOverlay}>
-                    <div className={styles.content}>
-                        <p className={styles.text}>{memo.jpText}</p>
-                        {/* English Subtext */}
-                        {(memo.enText || (memo.aiCache && memo.aiCache.english)) && (
-                            <p className={styles.subtext}>
-                                {memo.enText || memo.aiCache.english}
-                            </p>
-                        )}
-                        <div className={styles.meta}>
-                            <Clock size={12} className={styles.icon} />
-                            <span>{formatDate(memo.createdAt)}</span>
-                        </div>
-                    </div>
+                    <p className={styles.text}>{memo.jpText}</p>
+                    {/* Compact English Subtext */}
+                    {(memo.enText || (memo.aiCache && memo.aiCache.english)) && (
+                        <p className={styles.subtext}>
+                            {memo.enText || memo.aiCache.english}
+                        </p>
+                    )}
                 </Link>
             </div>
         </div>
